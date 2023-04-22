@@ -2,10 +2,11 @@ import {
   BigNumber,
   utils,
 } from "https://cdn.ethers.io/lib/ethers-5.6.esm.min.js";
-import { readCSVObjects } from "https://deno.land/x/csv@v0.7.4/mod.ts";
+
 import * as path from "https://deno.land/std@0.136.0/path/mod.ts";
-import { AddressBookEntry, Transfer, SafeTransaction } from "./models.ts";
-import { decodePayouts, fullNameIfAvailable, writeCSV } from "./util.ts";
+import { Transfer, SafeTransaction } from "./lib/models.ts";
+import { decodePayouts, fullNameIfAvailable, writeCSV } from "./lib/util.ts";
+import { addressBookFromCSV } from "./lib/addressBook.ts";
 import {
   basicTxValidation,
   validateETHTransfer,
@@ -13,9 +14,9 @@ import {
   isSameAddress,
   validateErc20Transfer,
   notifyIfDifferent,
-  notifyIfNot
-} from "./validations.ts";
-import { COW_TOKEN, WETH_TOKEN } from "./constants.ts";
+  notifyIfNot,
+} from "./lib/validations.ts";
+import { COW_TOKEN, WETH_TOKEN } from "./lib/constants.ts";
 
 const [txid, pathToPayouts] = Deno.args;
 
@@ -24,33 +25,15 @@ const addressbookPath = path.join(
   scriptPath.slice(0, scriptPath.lastIndexOf("/")),
   "./AddressBook.csv"
 );
-const solvers: string[] = [];
-const cowRewardTargets: string[] = [];
-const addressBook: AddressBookEntry[] = [];
-for await (const entry of readCSVObjects(
-  await Deno.open(addressbookPath, { read: true })
-)) {
-  const address = utils.getAddress(entry.address) as string;
-  const name = entry.name;
-  const chainId = Number(entry.chainId);
-  const parsedEntry: AddressBookEntry = { address, name, chainId };
-  addressBook.push(parsedEntry);
+const { addressBook, solvers, rewardTargets } = await addressBookFromCSV(
+  addressbookPath
+);
 
-  if (chainId === 1 && /^(prod|barn)-.*/.test(name)) {
-    const possibleAddress = utils.getAddress(address);
-    if (possibleAddress) {
-      solvers.push(possibleAddress);
-    }
-  } else if (chainId === 1 && /^RewardTarget\(.*\)$/.test(name)) {
-    const possibleAddress = utils.getAddress(address);
-    if (possibleAddress) {
-      cowRewardTargets.push(possibleAddress);
-    }
-  }
-}
-
-const payouts = pathToPayouts !== undefined ? await decodePayouts(pathToPayouts) : null;
-const response = await fetch(`https://safe-client.safe.global/v1/chains/1/transactions/${txid}`);
+const payouts =
+  pathToPayouts !== undefined ? await decodePayouts(pathToPayouts) : null;
+const response = await fetch(
+  `https://safe-client.safe.global/v1/chains/1/transactions/${txid}`
+);
 const txDetails = await response.json();
 
 basicTxValidation(addressBook, txDetails);
@@ -80,7 +63,7 @@ for (const [index, subTx] of Object.entries(subTxs)) {
     // ETH Transfer
     sumEth += BigInt(subTx.value);
     validateETHTransfer(subTx, subTxStr, solvers, addressBook);
-    realReceiver = subTx.to
+    realReceiver = subTx.to;
     transferList.push({
       receiver: subTx.to,
       token: "ETH",
@@ -97,6 +80,13 @@ for (const [index, subTx] of Object.entries(subTxs)) {
       subTx.dataDecoded.parameters;
 
     sumCow += BigInt(realAmount); // nonsense if some of the condition is invalid
+    notifyIfNot(
+      rewardTargets.includes(realReceiver),
+      `${subTxStr} sends COW to address ${fullNameIfAvailable(
+        addressBook,
+        realReceiver
+      )} that is not in the cow reward target list`
+    );
     transferList.push({
       receiver: realReceiver,
       token: subTx.to,

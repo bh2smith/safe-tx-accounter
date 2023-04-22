@@ -25,7 +25,7 @@ export interface SafeTransaction {
   value: bigint;
   data: string;
   dataDecoded: DecodedData;
-  operation: number
+  operation: number;
 }
 
 export interface TxInfo {
