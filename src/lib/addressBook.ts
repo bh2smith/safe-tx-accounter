@@ -1,17 +1,22 @@
+import * as path from "https://deno.land/std@0.136.0/path/mod.ts";
 import { AddressBookEntry } from "./models.ts";
-
 import { readCSVObjects } from "https://deno.land/x/csv@v0.7.4/mod.ts";
 import { utils } from "https://cdn.ethers.io/lib/ethers-5.6.esm.min.js";
 
-interface AddressCollection {
+export interface AddressCollection {
   addressBook: AddressBookEntry[];
   solvers: string[];
   rewardTargets: string[];
 }
 
 export async function addressBookFromCSV(
-  addressbookPath: string
+  fileName: string
 ): Promise<AddressCollection> {
+  const scriptPath = new URL(import.meta.url).pathname;
+  const addressbookPath = path.join(
+    scriptPath.slice(0, scriptPath.lastIndexOf("/")),
+    fileName
+  );
   const solvers: string[] = [];
   const rewardTargets: string[] = [];
   const addressBook: AddressBookEntry[] = [];

@@ -1,8 +1,5 @@
 import { utils } from "https://cdn.ethers.io/lib/ethers-5.6.esm.min.js";
-import {
-  readCSVObjects,
-  writeCSVObjects,
-} from "https://deno.land/x/csv@v0.7.4/mod.ts";
+import { writeCSVObjects } from "https://deno.land/x/csv@v0.7.4/mod.ts";
 import { AddressBookEntry, Transfer } from "./models.ts";
 
 export function fullNameIfAvailable(
@@ -18,16 +15,6 @@ export function fullNameIfAvailable(
     const { address, name, chainId } = matchingEntry;
     return `${address} (${name} @ chainId ${chainId})`;
   }
-}
-
-export async function decodePayouts(pathToPayouts: string) {
-  const payoutFile = await Deno.open(pathToPayouts);
-  const payouts = [];
-  for await (const payout of readCSVObjects(payoutFile)) {
-    payouts.push(payout);
-  }
-  payoutFile.close();
-  return payouts;
 }
 
 function addressCompare(a: string, b: string): number {
