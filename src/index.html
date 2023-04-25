@@ -14,36 +14,16 @@
         vertical-align: middle;
       }
       #order input[type=text],
-      #order select {
-        font-family: monospace;
-        display: inline-block;
-        box-sizing: border-box;
-        height: 1.75rem;
-        width: 35rem;
-        vertical-align: middle;
-      }
-      #order input[type=checkbox] {
-        height: 1.75rem;
-        display: inline-block;
-        box-sizing: border-box;
-        margin: 0;
-        vertical-align: middle;
-      }
       #actions {
         margin-top: 1rem;
         box-sizing: border-box;
         width: 46rem;
       }
-      #order button {
-        font-family: monospace;
-        width: 1.4rem;
-        height: 1.6rem;
-      }
       #actions button {
         float: right;
         margin-left: 1rem;
         height: 1.75rem;
-        width: 6.4rem;
+        width: 10.4rem;
       }
     </style>
   </head>
@@ -51,8 +31,8 @@
   <body>
     <form id="order">
       <div class="group">
-        <label for="safeTransactionId">Safe transaction ID</label><!--
-     --><input type="text" id="safeTransactionId" value="multisig_0xA03be496e67Ec29bC62F01a428683D7F9c204930_0x05b1ed0ddcc1b03c97421d91372b82f67cb1c8fed80de1f856bdfc7b1ed842d7">
+        <label for="safeTransactionId">Safe transaction ID</label>
+        <input type="text" id="safeTransactionId" value="multisig_0xA03be496e67Ec29bC62F01a428683D7F9c204930_0x05b1ed0ddcc1b03c97421d91372b82f67cb1c8fed80de1f856bdfc7b1ed842d7">
       </div>
       <div id="actions">
         <button type="button" id="csv">Generate CSV</button>
