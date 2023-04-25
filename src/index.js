@@ -8,9 +8,9 @@ function handleError(inner) {
 
 document.querySelector("#csv").addEventListener(
   "click",
-  handleError(async () => {
+  handleError(() => {
     const safeTransactionId =
       document.querySelector("#safeTransactionId").value;
-    alert(safeTransactionId);
+    alert(`Safe TxId Provided: ${safeTransactionId}`);
   })
 );
