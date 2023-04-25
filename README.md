@@ -1,8 +1,6 @@
-# Run the Web UI
-
 A tiny static HTML page for extracting Safe Multi-Transfers from transaction ids
 
-## Building
+# Build & Run the Web UI
 
 Building the static page requires:
 - POSIX environment, specifically `make` and `sed`
